@@ -1,0 +1,290 @@
+{% extends 'userheader.html' %}
+
+{% block content %}
+<div class="wishlist-container">
+    <div class="wishlist-header">
+        <h2>My Wishlist</h2>
+    </div>
+
+    {% if wishlist_items %}
+        <div class="wishlist-grid">
+            {% for item in wishlist_items %}
+                <div class="wishlist-item">
+                    <div class="wishlist-image">
+                        <img src="{{ item.product.image1.url }}" alt="{{ item.product.name }}">
+                    </div>
+                    
+                    <div class="wishlist-details">
+                        <h3><a href="">{{ item.product.name }}</a></h3>
+                        
+                        {% if item.product_variant %}
+                            <div class="product-variant">
+                                <span>Size: {{ item.product_variant.size }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="product-price">
+                            <span>₹{{ item.product.price }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="wishlist-actions">
+                        <form action="{% url 'add_items_cart' item.product.id item.product_variant.size %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-cart">
+                                <i class="fa fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </form>
+                        
+                        <form action="{% url 'remove_items_wishlist' item.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-remove">
+                                <i class="fa fa-trash"></i> Remove
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-wishlist">
+            <div class="empty-icon">
+                <i class="fa fa-heart-o"></i>
+            </div>
+            <p>Your wishlist is empty</p>
+            <a href="{% url 'shop_list' %}" class="btn-shopping">Continue Shopping</a>
+        </div>
+    {% endif %}
+</div>
+
+
+<!-- Pop-up Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Safe JSON conversion for Django messages -->
+<script id="messages-data" type="application/json">
+    [{% for message in messages %}{"text": "{{ message }}", "tag": "{{ message.tags }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<script>
+    // Parse messages safely from JSON script tag
+    const messages = JSON.parse(document.getElementById('messages-data').textContent);
+
+    if (messages.length > 0) {
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        messages.forEach(msg => {
+            modalTitle.textContent = msg.tag === 'success' ? 'Success' : 'Error';
+            modalMessage.textContent = msg.text;
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+    }
+</script>
+
+
+<style>
+    .wishlist-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    
+    .wishlist-header {
+        margin-bottom: 30px;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 15px;
+    }
+    
+    .wishlist-header h2 {
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+    }
+    
+    .wishlist-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+    }
+    
+    .wishlist-item {
+        border: 1px solid #f0f0f0;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .wishlist-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .wishlist-image {
+        height: 220px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f9f9f9;
+    }
+    
+    .wishlist-image img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        transition: transform 0.5s ease;
+    }
+    
+    .wishlist-item:hover .wishlist-image img {
+        transform: scale(1.05);
+    }
+    
+    .wishlist-details {
+        padding: 15px;
+    }
+    
+    .wishlist-details h3 {
+        margin: 0 0 10px;
+        font-size: 16px;
+        font-weight: 500;
+    }
+    
+    .wishlist-details h3 a {
+        color: #333;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .wishlist-details h3 a:hover {
+        color: #4a90e2;
+    }
+    
+    .product-variant {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .product-price {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin: 10px 0;
+    }
+    
+    .wishlist-actions {
+        display: flex;
+        padding: 15px;
+        border-top: 1px solid #f0f0f0;
+        gap: 10px;
+    }
+    
+    .wishlist-actions form {
+        flex: 1;
+    }
+    
+    .btn-cart, .btn-remove {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background-color 0.2s, transform 0.1s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .btn-cart {
+        background-color: #4a90e2;
+        color: white;
+    }
+    
+    .btn-cart:hover {
+        background-color: #3a80d2;
+    }
+    
+    .btn-remove {
+        background-color: white;
+        color: #f44336;
+        border: 1px solid #f44336;
+    }
+    
+    .btn-remove:hover {
+        background-color: #fff8f8;
+    }
+    
+    .empty-wishlist {
+        text-align: center;
+        padding: 50px 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .empty-icon {
+        font-size: 60px;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+    
+    .empty-wishlist p {
+        color: #888;
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+    
+    .btn-shopping {
+        display: inline-block;
+        background-color: #4a90e2;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-shopping:hover {
+        background-color: #3a80d2;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .wishlist-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .wishlist-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Font Awesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}

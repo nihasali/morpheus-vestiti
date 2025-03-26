@@ -1,0 +1,70 @@
+{% extends 'admin/header.html' %}
+{% load static %}
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Transactions</h2>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-12">  <!-- Full width -->
+                    <header class="border-bottom mb-4 pb-4">
+                        <div class="row">
+                            <div class="col-lg-5 col-6 me-auto">
+                                <input type="text" placeholder="Search..." class="form-control" />
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Transaction ID</th>
+                                    <th>User</th>
+                                    <th>Paid</th>
+                                    <th>Method</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th >Order Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trans in transactions %}
+                                <tr>
+                                    <td><b>#{{ trans.id }}</b></td>
+                                    <td>{{trans.user}}</td>
+                                    <td>₹{{ trans.amount }}</td>
+                                    <td>
+                                        <div class="icontext">
+                                            {% if trans.payment_method %}
+                                                <span class="text text-muted">{{ trans.payment_method|title }}</span>
+                                            {% else %}
+                                                <span class="text text-muted">N/A</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ trans.created_at|date:"d.m.Y" }}</td>
+                                    <td><h5>{{ trans.status }}</h5></td>
+                                    <td>
+                                        <a href="{% url 'admin_order_details' trans.order.id %}?prev=transactionlist">Details</a>
+                                       
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">No transactions found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- Full width column ends -->
+            </div> <!-- Row ends -->
+        </div> <!-- Card body ends -->
+    </div> <!-- Card ends -->
+</section>
+
+{% endblock %}

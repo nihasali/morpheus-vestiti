@@ -1,0 +1,162 @@
+{% extends 'admin/header.html' %}
+
+{% load static %}
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order Detail</h2>
+            <p>Details for Order ID: {{ order.id }}</p>
+        </div>
+        <div class="text-end">
+            <a href="{% url 'admin_order_list' %}" class="btn btn-secondary">
+                <i class="material-icons md-arrow_back"></i> Back to Order List
+            </a>
+        </div>
+    </div>
+    <div class="card">
+        <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
+                    <span><i class="material-icons md-calendar_today"></i> <b>{{ order.created_at|date:"D, M d, Y, h:i A" }}</b></span><br />
+                    <small class="text-muted">Order ID: {{ order.id }}</small>
+                </div>
+                <div class="col-lg-6 col-md-6 ms-auto text-md-end">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <select name="status" class="form-select d-inline-block mb-lg-0 mr-5 mw-200">
+                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="canceled" {% if order.status == 'canceled' %}selected{% endif %}>Canceled</option>
+                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </header>
+
+        <div class="card-body">
+            <div class="row mb-50 mt-20 order-info-wrap">
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-person"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Customer</h6>
+                            <p class="mb-1">
+                                {{ order.user.username }} <br />
+                                {{ order.user.email }}
+                            </p>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-local_shipping"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Order Info</h6>
+                            <p class="mb-1">
+                                Pay method: {{ order.payment_method }} <br />
+                                Status: {{ order.status }}
+                            </p>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-place"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Deliver to</h6>
+                            <p class="mb-1">
+                                {{ order.address.city }}, {{ order.address.state }} <br />
+                                {{ order.address.address }} <br />
+                                {{ order.address.pincode }}
+                            </p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th width="40%">Product</th>
+                                    <th width="20%">Unit Price</th>
+                                    <th width="20%">Quantity</th>
+                                    <th width="20%" class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order_items %}
+                                <tr>
+                                    <td>
+                                        <a class="itemside" href="#">
+                                            <div class="info">{{ item.product.name }} (Size: {{ item.size_variant.size }})</div>
+                                        </a>
+                                    </td>
+                                    <td>₹{{ item.price }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td class="text-end">₹{{item.total_price}}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr>
+                                    <td colspan="4">
+                                        <article class="float-end">
+                                            <dl class="dlist">
+                                                <dt>Subtotal:</dt>
+                                                <dd>₹{{ order.real_price }}</dd>
+                                            </dl>
+                                            <dl class="dlist">
+                                                <dt>Grand total:</dt>
+                                                <dd><b class="h5">₹{{ order.total_price }}</b></dd>
+                                            </dl>
+                                            <dl class="dlist">
+                                                <dt class="text-muted">Status:</dt>
+                                                <dd>
+                                                    <span class="badge rounded-pill alert-info">{{ order.status }}</span>
+                                                </dd>
+                                            </dl>
+                                        </article>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="box shadow-sm bg-light">
+                        <h6 class="mb-15">Payment info</h6>
+                        <p>
+                            Razorpay Order ID: {{ order.razorpay_order_id }}<br />
+                            Payment Method: {{ order.payment_method }}
+                        </p>
+                    </div>
+                    <div class="h-25 pt-4">
+                        <div class="mb-3">
+                            <label>Notes</label>
+                            <textarea class="form-control" name="notes" id="notes" placeholder="Type some note">{{ order.reason }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- content-main end// -->
+
+{% endblock %}

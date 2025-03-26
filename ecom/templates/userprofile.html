@@ -1,0 +1,694 @@
+{% extends 'userheader.html' %}
+{% load static %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <style>
+    :root {
+      --primary-color: #333333; /* Changed from blue to dark gray */
+      --primary-light: #f2f2f2; /* Changed from light blue to light gray */
+      --secondary-color: #f0f4f8;
+      --border-color: #e2e8f0;
+      --text-color: #2d3748;
+      --text-muted: #718096;
+      --success-color: #38a169;
+      --danger-color: #e53e3e;
+      --card-bg: #ffffff;
+      --hover-bg: #f7fafc;
+      --gradient-start: #f9fafb;
+      --gradient-end: #ffffff;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-color);
+      background-color: #f5f7fa;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .profile-container {
+      max-width: 1000px;
+      margin: 30px auto;
+      background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+    }
+    
+    .profile-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background-color: var(--card-bg);
+      overflow-x: auto;
+    }
+    
+    .nav-item {
+      padding: 18px 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      font-weight: 500;
+      position: relative;
+      color: var(--text-muted);
+    }
+    
+    .nav-item.active {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--primary-color);
+    }
+    
+    .nav-item:hover {
+      background-color: var(--hover-bg);
+    }
+    
+    .content-section {
+      padding: 30px;
+      display: none;
+    }
+    
+    .content-section.active {
+      display: block;
+      animation: fadeIn 0.5s;
+    }
+    
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    
+    .profile-header {
+      margin-bottom: 30px;
+      padding-bottom: 25px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .profile-info h1 {
+      margin: 0 0 10px 0;
+      font-size: 28px;
+      color: var(--text-color);
+    }
+    
+    .profile-info p {
+      margin: 5px 0;
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+    
+    .profile-badge {
+      display: inline-block;
+      background-color: var(--primary-light);
+      color: var(--primary-color);
+      font-size: 14px;
+      padding: 5px 15px;
+      border-radius: 20px;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    
+    .profile-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .detail-card {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 20px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid var(--border-color);
+    }
+    
+    .detail-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+      border-color: rgba(51, 51, 51, 0.3); /* Changed from blue to dark gray */
+    }
+    
+    .detail-label {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+    
+    .detail-value {
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+    
+    .phone-section {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 25px;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      color: var(--text-color);
+      margin-top: 0;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+      transition: all 0.3s;
+      background-color: var(--card-bg);
+    }
+    
+    input:focus, select:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.15); /* Changed from blue to dark gray */
+    }
+    
+    .readonly-input {
+      background-color: var(--secondary-color);
+      cursor: not-allowed;
+      color: var(--text-muted);
+    }
+    
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+    
+    button:hover {
+      background-color: #222222; /* Changed from blue to darker gray */
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(51, 51, 51, 0.25); /* Changed from blue to dark gray */
+    }
+    
+    .text-right {
+      text-align: right;
+    }
+    
+    .order-card {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      background-color: var(--card-bg);
+    }
+    
+    .order-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+      border-color: rgba(51, 51, 51, 0.3); /* Changed from blue to dark gray */
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .order-status {
+      font-weight: 600;
+      color: var(--primary-color);
+      background-color: var(--primary-light);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    
+    .order-items {
+      margin-bottom: 15px;
+      line-height: 1.8;
+    }
+    
+    .order-total {
+      font-weight: 600;
+      text-align: right;
+      font-size: 18px;
+      color: var(--text-color);
+    }
+    
+    .wallet-balance {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 30px 0;
+      text-align: center;
+      background: linear-gradient(135deg, var(--primary-light), #f7f7f7); /* Changed from blue gradient to gray */
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid rgba(51, 51, 51, 0.2); /* Changed from blue to dark gray */
+    }
+    
+    .transaction-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .transaction-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .transaction-desc {
+      flex: 1;
+    }
+    
+    .transaction-amount {
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .transaction-amount.credit {
+      color: var(--success-color);
+    }
+    
+    .transaction-amount.debit {
+      color: var(--danger-color);
+    }
+    
+    .transaction-date {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    
+    .address-card {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+      transition: transform 0.3s, box-shadow 0.3s;
+      background-color: var(--card-bg);
+    }
+    
+    .address-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+      border-color: rgba(51, 51, 51, 0.3); /* Changed from blue to dark gray */
+    }
+    
+    .default-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: var(--primary-color);
+      color: white;
+      font-size: 12px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    
+    .address-actions {
+      margin-top: 15px;
+    }
+    
+    .address-actions button {
+      margin-right: 10px;
+      padding: 8px 15px;
+      font-size: 13px;
+    }
+    
+    .logout-section {
+      text-align: center;
+      padding: 60px 0;
+      background: linear-gradient(to bottom, #fff5f5, #ffffff);
+      border-radius: 12px;
+      margin: 0 auto;
+      max-width: 500px;
+    }
+    
+    .logout-icon {
+      font-size: 50px;
+      color: var(--danger-color);
+      margin-bottom: 20px;
+      width: 80px;
+      height: 80px;
+      line-height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      background-color: #fff0f0;
+      border: 1px solid rgba(229, 62, 62, 0.2);
+    }
+    
+    .section-header {
+      margin-bottom: 25px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+    
+    .section-header h2 {
+      margin: 0;
+      color: var(--text-color);
+      font-size: 24px;
+    }
+    .transaction-amount.credit {
+    color: green;
+}
+.transaction-amount.debit {
+    color: red;
+}
+    
+    @media (max-width: 768px) {
+      .profile-container {
+        margin: 10px;
+        border-radius: 12px;
+      }
+      
+      .content-section {
+        padding: 20px;
+      }
+      
+      .nav-item {
+        padding: 12px 15px;
+        font-size: 14px;
+      }
+      
+      .profile-details {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+     <!-- Breadcrumb Section Begin -->
+     <section class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__text">
+                        <h4>Shop</h4>
+                        <div class="breadcrumb__links">
+                            <a href="{% url 'homepage' %}">Home </a>
+                            <span>Profile</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
+  <!-- Content section starts here - this is what you'll need to integrate with your header/footer -->
+  <div class="profile-container">
+    <div class="profile-nav">
+      <div class="nav-item " data-tab="profile">My Profile</div>
+      <div class="nav-item " data-tab="orders">My Orders</div>
+      <div class="nav-item " data-tab="addresses">My Addresses</div>
+      <div class="nav-item" data-tab="password">Change Password</div>
+      <div class="nav-item" data-tab="wallet">Wallet</div>
+      <div class="nav-item" data-tab="logout">Logout</div>
+    </div>
+    
+    <!-- Profile Section -->
+    <div id="profile" class="content-section active">
+      <div class="profile-header">
+        <div class="profile-info">
+          <h1>{{user.username}}</h1>
+          <div class="profile-badge">Verified Customer</div>
+        </div>
+      </div>
+      
+      <!-- Read-only profile details in card layout -->
+      <div class="profile-details">
+        <div class="detail-card">
+          <div class="detail-label">Full Name</div>
+          <div class="detail-value">{{user.username}}</div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-label">Email Address</div>
+          <div class="detail-value">{{user.email}}</div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-label">Member Since</div>
+          <div class="detail-value">{{user.date_joined}}</div>
+        </div>
+        
+        <div class="detail-card">
+          <div class="detail-label">Account Status</div>
+          <div class="detail-value">Active</div>
+        </div>
+      </div>
+      
+      <!-- Editable phone number section -->
+      <div class="phone-section">
+        <h3 class="section-title">Contact Information</h3>
+        <form>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" value="8746467476">
+            <p></p>
+            <small style="color:var(--text-muted); display:block; margin-top:8px;">End of profile views.</small>
+          </div>
+          <div class="text-right">
+            
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Orders Section -->
+     
+    <div id="orders" class="content-section">
+      <div class="section-header">
+        <h2>Recent Orders</h2>
+      </div>
+      
+      {% for order in orders %}
+      <div class="order-card">
+        <div class="order-header">
+          <div>
+            <strong>Order #{{order.id}}</strong>
+            <div>Placed on: {{ order.created_at|date:"d M, Y" }}</div>
+          </div>
+          <div class="{{order.status}}"><strong>{{ order.status|title }}</strong></div>
+        </div>
+        <div class="order-items">
+          <div></div>
+          <div></div>
+        </div>
+        <div class="order-total">
+          Total: ₹{{ order.total_price|floatformat:2 }}
+        </div>
+        <div class="text-right">
+          <a href="{% url 'order_details' order.id %}">
+          <button>View Details</button>
+          </a>
+        </div>
+      </div>
+      
+      {% endfor %}
+      
+    </div>
+    
+    <!-- Addresses Section -->
+     
+    <div id="addresses" class="content-section">
+      <div class="section-header">
+        <h2>My Addresses</h2>
+      </div>
+      {% for val in addresses %}
+      <div class="address-card">
+        <!-- <div class="default-badge"></div> -->
+        <strong>Home</strong>
+        <div>{{val.fullname}}</div>
+        <div>{{val.address}}</div>
+        <div>{{val.city}} , {{val.state}}</div>
+        <div>{{val.zipcode}}</div>
+        <div>Phone: {{val.phone}}</div>
+        
+        <div class="address-actions">
+          <a href="{% url 'edit_address' val.id %}">
+          <button>Edit</button>
+          </a>
+          <form action="{% url 'delete_address' val.id %}" method="POST" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" style="background-color: var(--danger-color);">Delete</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+      <div class="text-right" style="margin-top: 20px;">
+        <a href="{% url 'add_address' %}">
+        <button>Add New Address</button>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Change Password Section -->
+
+    
+    <div id="password" class="content-section">
+      <div class="section-header">
+          <h2>Change Password</h2>
+      </div>
+  
+      <div class="phone-section">
+          <form method="post">
+              {% csrf_token %}
+              <input type="hidden" name="password_form" value="1">
+              
+              <div class="form-group">
+                  <label for="currentPassword">Current Password</label>
+                  <input type="password" id="currentPassword" name="current_password" required>
+              </div>
+              
+              <div class="form-group">
+                  <label for="newPassword">New Password</label>
+                  <input type="password" id="newPassword" name="new_password" required>
+              </div>
+              
+              <div class="form-group">
+                  <label for="confirmPassword">Confirm New Password</label>
+                  <input type="password" id="confirmPassword" name="confirm_password" required>
+              </div>
+              
+              <div class="text-right">
+                  <button type="submit">Update Password</button>
+              </div>
+          </form>
+      </div>
+  
+      {% if messages %}
+          <div class="messages">
+              {% for message in messages %}
+                  <div class="{{ message.tags }}">{{ message }}</div>
+              {% endfor %}
+          </div>
+      {% endif %}
+  </div>
+  
+    
+    <!-- Wallet Section -->
+    <div id="wallet" class="content-section">
+      <div class="section-header">
+        <h2>My Wallet</h2>
+      </div>
+      
+      <div class="wallet-balance">
+        ${{request.user.wallet.balance}}
+      </div>
+      
+      <h3 class="section-title">Recent Transactions</h3>
+      
+      {% if transactions %}
+      <ul class="transaction-list">
+          {% for transaction in transactions %}
+          <li class="transaction-item">
+              <div class="transaction-desc">
+                  {% if transaction.status == 'canceled' %}
+                      <div>Order Canceled Refund #{{ transaction.order.id }}</div>
+                  {% elif transaction.status == 'returned' %}
+                      <div>Order Return Refund #{{ transaction.order.id }}</div>
+                  {% elif transaction.status == 'paid' %}
+                      <div>Order Payment #{{ transaction.order.id }}</div>
+                  {% else %}
+                      <div>{{ transaction.payment_method|capfirst }} Transaction</div>
+                  {% endif %}
+                  <div class="transaction-date">{{ transaction.created_at|date:"M d, Y" }}</div>
+              </div>
+  
+              {% if transaction.status in 'canceled returned' %}
+                  <div class="transaction-amount credit">+${{ transaction.amount }}</div>
+              {% elif transaction.status == 'paid' %}
+                  <div class="transaction-amount debit">-${{ transaction.amount }}</div>
+              {% else %}
+                  <div class="transaction-amount">{{ transaction.amount }}</div>
+              {% endif %}
+          </li>
+          {% endfor %}
+      </ul>
+      {% else %}
+          <p>No transactions found.</p>
+      {% endif %}
+    </div>
+    
+    <!-- Logout Section -->
+    <div id="logout" class="content-section">
+      <div class="logout-section">
+        <div class="logout-icon">⟲</div>
+        <h2>Are you sure you want to logout?</h2>
+        <p>You will be redirected to the login page.</p>
+        <a href="{% url 'logout_user' %}">
+        <button style="background-color: var(--danger-color); margin-top: 15px;" >Logout</button>
+        </a>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Simple tab navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          // Update active tab
+          document.querySelectorAll('.nav-item').forEach(navItem => {
+            navItem.classList.remove('active');
+          });
+          item.classList.add('active');
+          
+          // Show corresponding content
+          document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
+          });
+          document.getElementById(item.getAttribute('data-tab')).classList.add('active');
+        });
+      });
+    });
+  </script>
+  <!-- Content section ends here -->
+</body>
+</html>
+
+{% endblock %}

@@ -1,0 +1,417 @@
+{% extends 'userheader.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Address</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4caf50;
+            --primary-gradient: linear-gradient(135deg, #4caf50, #2e7d32);
+            --secondary-color: #2e7d32;
+            --accent-color: #2e7d32;
+            --text-primary: #333333;
+            --text-secondary: #5a5a5a;
+            --border-radius: 10px;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #f8fafc;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+
+        .form-header {
+            margin-bottom: 35px;
+            position: relative;
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 28px;
+            color: var(--text-primary);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+        
+        .form-subtitle {
+            text-align: center;
+            font-size: 15px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .form-section:last-of-type {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-size: 15px;
+            transition: var(--transition);
+            background-color: #f8fafc;
+            color: var(--text-primary);
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
+            outline: none;
+            background-color: #fff;
+        }
+        
+        .form-control::placeholder {
+            color: #a0aec0;
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .form-check input[type="checkbox"] {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border: 2px solid #e2e8f0;
+            border-radius: 4px;
+            outline: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .form-check input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .form-check input[type="checkbox"]:checked::before {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+        }
+        
+        .form-check label {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .save-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .save-btn:hover::before {
+            left: 100%;
+        }
+        
+        .save-btn:active {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-top: 20px;
+            padding: 8px 16px;
+            border-radius: var(--border-radius);
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .back-link:hover {
+            color: var(--primary-color);
+            background-color: rgba(76, 175, 80, 0.05);
+        }
+        
+        .back-link:hover i {
+            transform: translateX(-3px);
+        }
+        
+        .required-field::after {
+            content: '*';
+            color: #e53e3e;
+            margin-left: 4px;
+        }
+        
+        /* Floating labels animation */
+        .float-label {
+            position: relative;
+        }
+        
+        .float-label label {
+            position: absolute;
+            top: 14px;
+            left: 16px;
+            background: transparent;
+            color: #a0aec0;
+            transition: var(--transition);
+            pointer-events: none;
+            padding: 0 4px;
+            z-index: 1;
+            font-size: 15px;
+        }
+        
+        .float-label input:focus + label,
+        .float-label input:not(:placeholder-shown) + label {
+            top: -10px;
+            left: 12px;
+            font-size: 12px;
+            color: var(--primary-color);
+            background: #ffffff;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .form-container {
+                margin: 20px 15px;
+                padding: 30px 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+                margin-bottom: 15px;
+            }
+            
+            .form-title {
+                font-size: 24px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- The form container -->
+<div class="form-container">
+    <div class="form-header">
+        <h2 class="form-title">Add New Address</h2>
+        <p class="form-subtitle">Please provide your shipping details to complete your profile</p>
+    </div>
+    
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-user"></i> Personal Information</h3>
+            
+            <div class="form-group">
+                <label for="id_full_name" class="required-field">Full Name</label>
+                <input type="text" id="id_full_name" name="fullname" class="form-control" placeholder="Enter your full name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="id_phone_number" class="required-field">Phone Number</label>
+                <input type="tel" id="id_phone_number" name="phone" class="form-control" placeholder="Enter your contact number" required>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-map-marker-alt"></i> Address Details</h3>
+            
+            <div class="form-group">
+                <label for="id_address" class="required-field">House Name/No.</label>
+                <input type="text" id="id_address" name="address" class="form-control" placeholder="Apartment, suite, unit, building, floor, etc." required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_city" class="required-field">City</label>
+                    <input type="text" id="id_city" name="city" class="form-control" placeholder="Enter your city" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_state" class="required-field">State</label>
+                    <input type="text" id="id_state" name="state" class="form-control" placeholder="Enter your state" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_postal_code" class="required-field">Postal Code</label>
+                    <input type="text" id="id_postal_code" name="zipcode" class="form-control" placeholder="Enter your postal code" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_landmark">Landmark</label>
+                    <input type="text" id="id_landmark" name="landmark" class="form-control" placeholder="Nearby landmark (optional)">
+                </div>
+            </div>
+
+            <div class="form-check">
+                <input type="checkbox" id="id_is_default" name="default" class="form-check-input">
+                <label class="form-check-label" for="id_is_default">Set as Default Address</label>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="save-btn">Save Address</button>
+            <a href="{% url 'checkout' %}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Checkout
+            </a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
+{% endblock %}

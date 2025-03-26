@@ -1,0 +1,304 @@
+{% extends "admin/header.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="report-header">
+        <h2>Sales Report</h2>
+        <p class="report-subtitle">View and analyze your sales performance</p>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="GET" action="{% url 'sales_report_view' %}" class="filter-form" onsubmit="return cleanForm()">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="filter">Report Type:</label>
+                            <select name="filter" id="filter" class="form-control">
+                                <option value="daily" {% if filter_type == "daily" %}selected{% endif %}>Daily</option>
+                                <option value="weekly" {% if filter_type == "weekly" %}selected{% endif %}>Weekly</option>
+                                <option value="yearly" {% if filter_type == "yearly" %}selected{% endif %}>Yearly</option>
+                                <option value="custom" {% if filter_type == "custom" %}selected{% endif %}>Custom Date Range</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="start_date">Start Date:</label>
+                            <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="end_date">End Date:</label>
+                            <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary btn-block">Generate Report</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="report-info mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-card-label">Filter Type</div>
+                    <div class="info-card-value">{{ filter_type|title }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-card-label">Start Date</div>
+                    <div class="info-card-value">{{ start_date }}</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-card">
+                    <div class="info-card-label">End Date</div>
+                    <div class="info-card-value">{{ end_date }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if orders %}
+        <div class="table-responsive mt-4">
+            <table class="table table-hover table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Payment Method</th>
+                        <th>Total Price</th>
+                        <th>Discount</th>
+                        <th>Final Price</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td><span class="order-id badge badge-light">#{{ order.id }}</span></td>
+                        <td>{{ order.user.username }}</td>
+                        <td>{{ order.payment_method }}</td>
+                        <td>₹{{ order.real_price|floatformat:2 }}</td>
+                        <td>₹{{ order.discount_amount|floatformat:2 }}</td>
+                        <td><strong>₹{{ order.total_price|floatformat:2 }}</strong></td>
+                        <td>
+                            <span class="status-badge status-{{ order.status|lower }}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td>{{ order.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                                <p class="lead">No orders found matching your filter criteria.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="export-options mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Export Report</h5>
+                    <p class="card-text">Download this report in your preferred format</p>
+                    <a href="{% url 'download_sales_report_excel' %}?filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}" 
+                        class="btn btn-success mr-2">
+                        <i class="fas fa-file-excel mr-1"></i> Excel Format
+                    </a>
+                    <a href="{% url 'download_sales_report_pdf' %}?filter={{ filter_type }}&start_date={{ start_date }}&end_date={{ end_date }}" 
+                        class="btn btn-danger">
+                        <i class="fas fa-file-pdf mr-1"></i> PDF Format
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle mr-2"></i>
+            No orders found for the selected criteria. Try adjusting your filter settings.
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    /* Professional styling for sales report */
+    .report-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eaeaea;
+    }
+    
+    .report-header h2 {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .report-subtitle {
+        color: #7f8c8d;
+        font-size: 1rem;
+    }
+    
+    .card {
+        border: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+    }
+    
+    .form-control {
+        border-radius: 4px;
+        border: 1px solid #dce4ec;
+        padding: 0.75rem;
+        height: auto;
+    }
+    
+    .btn-primary {
+        background-color: #3498db;
+        border: none;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    
+    .btn-primary:hover {
+        background-color: #2980b9;
+        transform: translateY(-1px);
+    }
+    
+    .info-card {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.25rem;
+        height: 100%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .info-card-label {
+        color: #7f8c8d;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-card-value {
+        color: #34495e;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+    
+    .table {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table thead th {
+        background-color: #34495e;
+        color: white;
+        font-weight: 500;
+        border: none;
+        padding: 1rem;
+    }
+    
+    .table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-color: #ecf0f1;
+    }
+    
+    .order-id {
+        font-family: monospace;
+        font-weight: 600;
+    }
+    
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        display: inline-block;
+    }
+    
+    .status-completed {
+        background-color: #e6f7ee;
+        color: #27ae60;
+    }
+    
+    .status-pending {
+        background-color: #fef7e6;
+        color: #f39c12;
+    }
+    
+    .status-cancelled {
+        background-color: #fdeaec;
+        color: #e74c3c;
+    }
+    
+    .status-processing {
+        background-color: #e6f5fa;
+        color: #3498db;
+    }
+    
+    .export-options {
+        margin-bottom: 3rem;
+    }
+    
+    .export-options .card-title {
+        color: #2c3e50;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .export-options .card-text {
+        color: #7f8c8d;
+        margin-bottom: 1.25rem;
+    }
+    
+    .btn-success, .btn-danger {
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+    
+    .btn-success:hover, .btn-danger:hover {
+        transform: translateY(-1px);
+    }
+    
+    .empty-state {
+        padding: 2rem 0;
+        color: #7f8c8d;
+    }
+</style>
+
+<script>
+    function cleanForm() {
+      const filter = document.getElementById('filter').value;
+      if (filter !== 'custom') {
+        document.getElementById('start_date').removeAttribute('name');
+        document.getElementById('end_date').removeAttribute('name');
+      }
+      return true;
+    }
+</script>
+
+{% endblock %}

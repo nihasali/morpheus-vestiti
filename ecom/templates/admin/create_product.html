@@ -1,0 +1,148 @@
+{% extends 'admin/header.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Create Product</h2>
+        
+        <form method="post" enctype="multipart/form-data" action="{% url 'create_product' %}" id="productForm">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="name" class="form-label">Product Name</label>
+                <input type="text" name="name" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="3" required></textarea>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="price" class="form-label">Price ($)</label>
+                    <input type="number" name="price" class="form-control" step="0.01" min="1" max="10000" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label for="category_id" class="form-label">Category</label>
+                    <select name="category_id" class="form-select" required>
+                        <option value="" disabled selected>Choose category...</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="offer" class="form-label">Offer (Optional)</label>
+                <input type="text" name="offer" class="form-control">
+            </div>
+
+            <!-- Image Upload & Preview -->
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="image1" class="form-label">Image 1</label>
+                    <input type="file" name="image1" class="form-control image-input" id="image1" accept="image/*">
+                    <img id="preview1" class="img-thumbnail mt-2 d-none">
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="image2" class="form-label">Image 2</label>
+                    <input type="file" name="image2" class="form-control image-input" id="image2" accept="image/*">
+                    <img id="preview2" class="img-thumbnail mt-2 d-none">
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <label for="image3" class="form-label">Image 3</label>
+                    <input type="file" name="image3" class="form-control image-input" id="image3" accept="image/*">
+                    <img id="preview3" class="img-thumbnail mt-2 d-none">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100">Create Product</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="{% url 'product_list' %}" class="btn btn-outline-secondary">View Products</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- Pop-up Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Safe JSON conversion for Django messages -->
+<script id="messages-data" type="application/json">
+    [{% for message in messages %}{"text": "{{ message }}", "tag": "{{ message.tags }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<script>
+    // Parse messages safely from JSON script tag
+    const messages = JSON.parse(document.getElementById('messages-data').textContent);
+
+    if (messages.length > 0) {
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        messages.forEach(msg => {
+            modalTitle.textContent = msg.tag === 'success' ? 'Success' : 'Error';
+            modalMessage.textContent = msg.text;
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+    }
+</script>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Image Preview Functionality
+    document.querySelectorAll('.image-input').forEach(input => {
+        input.addEventListener('change', function(event) {
+            let reader = new FileReader();
+            let preview = document.getElementById("preview" + this.id.slice(-1));
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                preview.style.width = "100px";
+                preview.style.height = "100px";
+            };
+            
+            reader.readAsDataURL(event.target.files[0]);
+        });
+    });
+
+    // Form Validation
+    document.getElementById("productForm").addEventListener("submit", function(e) {
+        let name = document.querySelector("[name='name']").value.trim();
+        let description = document.querySelector("[name='description']").value.trim();
+        let price = document.querySelector("[name='price']").value;
+        
+        if (name === "" || description === "" || price === "") {
+            alert("Please fill out all required fields.");
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

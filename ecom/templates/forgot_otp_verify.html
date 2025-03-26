@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --error-color: #ef233c;
+            --background-color: #f8f9fa;
+            --card-background: #ffffff;
+            --text-color: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 0 0 10px 0;
+        }
+        
+        .subtitle {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+        }
+        
+        .error-message {
+            background-color: rgba(239, 35, 60, 0.1);
+            color: var(--error-color);
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .otp-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.15s ease-in-out;
+            box-sizing: border-box;
+        }
+        
+        .otp-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.25);
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 14px 24px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #3a56d4;
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .secure-note {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 24px;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Verify Your Account</h2>
+            <p class="subtitle">Please enter the verification code sent to your email</p>
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="error-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="otp">Verification Code</label>
+                <input type="text" id="otp" name="otp" class="otp-input" required placeholder="Enter 6-digit code" maxlength="6" autocomplete="one-time-code">
+            </div>
+            
+            <button type="submit" class="btn">Verify Code</button>
+        </form>
+        
+        <p class="secure-note">This verification code will expire in 10 minutes for security reasons</p>
+    </div>
+</body>
+</html>

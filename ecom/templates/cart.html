@@ -1,0 +1,317 @@
+{% extends 'userheader.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+
+.order-summary-container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.order-summary-header {
+    padding: 24px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.order-summary-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #222;
+}
+
+.order-summary-content {
+    padding: 24px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.summary-row:last-child {
+    margin-bottom: 0;
+}
+
+.summary-label {
+    color: #555;
+    font-size: 15px;
+}
+
+.summary-value {
+    font-weight: 500;
+    color: #333;
+    font-size: 15px;
+}
+
+.summary-divider {
+    height: 1px;
+    background-color: #eaeaea;
+    margin: 20px 0;
+}
+
+.total-row {
+    margin-top: 8px;
+}
+
+.total-row .summary-label,
+.total-row .summary-value {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+}
+
+.order-summary-footer {
+    padding: 24px;
+    border-top: 1px solid #eaeaea;
+}
+
+.checkout-button {
+    display: block;
+    width: 100%;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 16px 24px;
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.checkout-button:hover {
+    background-color: #222;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.secure-checkout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 16px;
+    color: #777;
+    font-size: 13px;
+}
+
+.secure-checkout svg {
+    margin-right: 6px;
+}
+</style>
+
+   <!-- Breadcrumb Section Begin -->
+   <section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Shopping Cart</h4>
+                    <div class="breadcrumb__links">
+                        <a href="./index.html">Home </a>
+                        <a href="./shop.html">Shop </a>
+                        <span>Shopping Cart</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Shopping Cart Section Begin -->
+<section class="shopping-cart spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="shopping__cart__table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="padding-right: 20px;">Product</th>
+                                <th style="padding-right: 20px;">Size</th>
+                                <th style="padding-right: 20px;">Quantity</th>
+
+                                <th>Total</th>
+                                <th>Optout</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in cart_items %}
+                            <tr>
+                                <td class="product__cart__item">
+                                    <div style="display: flex; align-items: center; gap: 15px;">
+                                        <!-- Image -->
+                                        <div class="product__cart__item__pic">
+                                            <img src="{{item.product.image1.url}}" alt="" style="width: 100px; height: 100px; object-fit: cover;">
+                                        </div>
+                                        <!-- Name and Price beside the Image -->
+                                        <div class="product__cart__item__text">
+                                            <h6 data-id="{{item.product.id}}">{{item.product.name}}</h6>
+                                            
+                                            <h5>₹{{item.product.price}}</h5>
+                                            <br>
+                                            <h6>
+                                                
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="cart__size" style="padding-right: 20px;">{{item.size}}</td>
+                                <td class="quantity__item" style="padding-right: 20px;">
+                                    <form action="{% url 'update_cart' item.id %}" method="post" class="d-flex align-items-center">
+                                        {% csrf_token %}
+                                        
+                                        <!-- Decrease Button -->
+                                        <button type="button" onclick="changeQuantity(this, -1)" class="btn btn-sm btn-outline-secondary">−</button>
+                                        
+                                        <!-- Quantity Input -->
+                                        <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="3"
+                                               style="width: 50px; padding: 5px; text-align: center; border: 1px solid #ddd; border-radius: 5px; margin: 0 5px;"
+                                               onchange="this.form.submit()" id="quantity-input-{{ item.id }}">
+                                        
+                                        <!-- Increase Button -->
+                                        <button type="button" onclick="changeQuantity(this, 1)" class="btn btn-sm btn-outline-secondary">+</button>
+                                
+                                    </form>
+                                </td>
+                                
+                                
+                                
+                                <td class="cart__price">₹{{item.total_price}}</td>
+                                <td >
+                                    <form action="{% url 'delete_items_cart' item.id %}" method="post" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            
+                            {% endfor %}
+                           
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="continue__btn">
+                            <a href="{% url 'shop_list' %}">Continue Shopping</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6">
+                        <div class="continue__btn update__btn">
+                            <a href=""><i class="fa fa-spinner"></i> Update cart</a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+
+            <div class="col-lg-4">
+                <div class="order-summary-container">
+                    <div class="order-summary-header">
+                        <h4>Shopping Cart Summary</h4>
+                    </div>
+                    <div class="order-summary-content">
+                        <div class="summary-row">
+                            <span class="summary-label">Subtotal</span>
+                            <span class="summary-value">₹{{total_price}}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Shipping</span>
+                            <span class="summary-value">Free</span>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div class="summary-row total-row">
+                            <span class="summary-label">Total</span>
+                            <span class="summary-value">₹{{total_price}}</span>
+                        </div>
+                    </div>
+                    <div class="order-summary-footer">
+                        <a href="{% url 'checkout' %}" class="checkout-button">
+                            Proceed to Checkout
+                        </a>
+                        <div class="secure-checkout">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>Secure Checkout</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Shopping Cart Section End -->
+
+
+<!-- Pop-up Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Safe JSON conversion for Django messages -->
+<script id="messages-data" type="application/json">
+    [{% for message in messages %}{"text": "{{ message }}", "tag": "{{ message.tags }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<script>
+    // Parse messages safely from JSON script tag
+    const messages = JSON.parse(document.getElementById('messages-data').textContent);
+
+    if (messages.length > 0) {
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        messages.forEach(msg => {
+            modalTitle.textContent = msg.tag === 'success' ? 'Success' : 'Error';
+            modalMessage.textContent = msg.text;
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+    }
+</script>
+
+<script>
+    function changeQuantity(button, change) {
+        let form = button.closest('form');
+        let input = form.querySelector('input[name="quantity"]');
+        let currentValue = parseInt(input.value);
+        let min = parseInt(input.min);
+        let max = parseInt(input.max);
+
+        let newValue = currentValue + change;
+        if (newValue >= min && newValue <= max) {
+            input.value = newValue;
+            form.submit();  // Automatically submit the form on change
+        }
+    }
+</script>
+
+
+{% endblock %}

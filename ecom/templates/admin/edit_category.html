@@ -1,0 +1,114 @@
+{% extends 'admin/header.html' %}
+
+{% load static %}
+{% block content %}
+            <section class="content-main">
+                <div class="content-header">
+                    <h2 class="content-title">Edit Catagory</h2>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row gx-5">
+                           
+                            <div class="col-lg-9">
+                                <section class="content-body p-xl-4">
+                                    {% if item %}
+                                    <form  enctype="multipart/form-data" method="POST" action="{%  url 'edit_category' item.id %}">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-lg-8">
+                                                
+                                                <div class="row gx-3">
+                                                    <div class="col-6 mb-3">
+                                                        <label class="form-label">Name</label>
+                                                        <input name="name" class="form-control" type="text" value="{{item.name}}"  placeholder=""  />
+                                                    </div>
+                                                    <!-- col .// -->
+                                                    <div class="col-lg-6 mb-3">
+                                                        <label class="form-label">Description</label>
+                                                        <input name="description" class="form-control" type="text"  value="{{item.description}}"  placeholder=""  />
+                                                    </div>
+                                                    <!-- col .// -->
+                                                    <div class="col-lg-6 mb-3">
+                                                        <label class="form-label">Offers</label>
+                                                        <input name="cat_offer" class="form-control" type="tel" value="{{item.cat_offer}}"   placeholder=""  />
+                                                    </div>
+                                                    {% if createerror %}
+                                                    <p style="color: red;">{{ createerror  }}</p>
+                                                    {% endif %}
+                                                    <!-- col .// -->
+                                                </div>
+                                                <!-- row.// -->
+                                            </div>
+                                            <!-- col.// -->
+                                            <aside class="col-lg-4">
+                                                <figure class="text-lg-center">
+                                                    <img class="img-lg mb-3 img-avatar" src="{{item.image.url}}" alt="User Photo" />
+                                                    <figcaption>
+                                                        <input type="file" name="image" class="form-control" id="product_image" accept="image/*"  />
+
+                                                    </figcaption>
+                                                </figure>
+                                            </aside>
+                                            <!-- col.// -->
+                                        </div>
+                                        <!-- row.// -->
+                                        
+                                        <button class="btn btn-primary" type="submit">Save changes</button>
+                                    </form>
+                                    {% endif %}
+
+                                    <hr class="my-5" />
+                
+                                    <!-- row.// -->
+                                </section>
+                                <!-- content-body .// -->
+                            </div>
+                            <!-- col.// -->
+                        </div>
+                        <!-- row.// -->
+                    </div>
+                    <!-- card body end// -->
+                </div>
+                <!-- card end// -->
+            </section>
+            <!-- content-main end// -->
+
+            <!-- Pop-up Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Safe JSON conversion for Django messages -->
+<script id="messages-data" type="application/json">
+    [{% for message in messages %}{"text": "{{ message }}", "tag": "{{ message.tags }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<script>
+    // Parse messages safely from JSON script tag
+    const messages = JSON.parse(document.getElementById('messages-data').textContent);
+
+    if (messages.length > 0) {
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        messages.forEach(msg => {
+            modalTitle.textContent = msg.tag === 'success' ? 'Success' : 'Error';
+            modalMessage.textContent = msg.text;
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+    }
+</script>
+{% endblock %}

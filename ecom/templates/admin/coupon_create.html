@@ -1,0 +1,126 @@
+{% extends 'admin/header.html' %}
+{% load static %}
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Coupons</h2>
+            <p>Add or edit a coupon</p>
+        </div>
+        <div>
+            <input type="text" placeholder="Search Coupons" class="form-control bg-white" />
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <!-- Create Coupon Form -->
+                <div class="col-md-3">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form enctype="multipart/form-data" method="POST" action="{% url 'create_coupon' %}">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="coupon_code" class="form-label">Code</label>
+                            <input type="text" name="code" placeholder="Enter coupon code" class="form-control" id="coupon_code" required value="{{ form.code.value|default:'' }}" />
+                        </div>
+                        <div class="mb-4">
+                            <label for="discount_value" class="form-label">Discount Value (%)</label>
+                            <input type="number" name="discount_value" placeholder="Enter discount percentage" class="form-control" id="discount_value" min="1" max="100" required value="{{ form.discount_value.value|default:'' }}" />
+                        </div>
+                        <div class="mb-4">
+                            <label for="min_purchase_amount" class="form-label">Minimum Purchase Amount</label>
+                            <input type="number" name="min_purchase_amount" placeholder="Enter minimum amount" class="form-control" id="min_purchase_amount" min="0" required value="{{ form.min_purchase_amount.value|default:'' }}" />
+                        </div>
+                        <div class="mb-4">
+                            <label for="valid_from" class="form-label">Valid From</label>
+                            <input type="date" name="valid_from" class="form-control" id="valid_from" required value="{{ form.valid_from.value|default:'' }}" />
+                        </div>
+                        <div class="mb-4">
+                            <label for="valid_to" class="form-label">Valid To</label>
+                            <input type="date" name="valid_to" class="form-control" id="valid_to" required value="{{ form.valid_to.value|default:'' }}" />
+                        </div>
+                        <div class="mb-4">
+                            <label for="usage_limit" class="form-label">Usage Limit</label>
+                            <input type="number" name="usage_limit" placeholder="Enter usage limit" class="form-control" id="usage_limit" min="1" required value="{{ form.usage_limit.value|default:'' }}" />
+                        </div>
+                        <input type="hidden" name="active" value="True" />
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                Create Coupon
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Coupon List -->
+                <div class="col-md-9">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Code</th>
+                                    <th>Discount (%)</th>
+                                    <th>Min Purchase</th>
+                                    <th>Valid Period</th>
+                                    <th>Usage Limit</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if item %}
+                                    {% for val in item %}
+                                        <tr>
+                                            <td>{{ val.id }}</td>
+                                            <td><b>{{ val.code }}</b></td>
+                                            <td>{{ val.discount_value }}%</td>
+                                            <td>{{ val.min_purchase_amount }}</td>
+                                            <td>{{ val.valid_from|date:"M d, Y" }} - {{ val.valid_to|date:"M d, Y" }}</td>
+                                            <td>{{ val.usage_limit }}</td>
+                                            <td>
+                                                {% if val.active %}
+                                                    <span class="badge bg-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Inactive</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <div class="action-buttons">
+                                                    <a href="{% url 'delete_coupon' val.id %}" class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</a>
+                                                    
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="8" class="text-center">No coupons available.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- .col// -->
+            </div>
+            <!-- .row // -->
+        </div>
+        <!-- card body .// -->
+    </div>
+    <!-- card .// -->
+</section>
+<!-- content-main end// -->
+
+
+
+{% endblock %}

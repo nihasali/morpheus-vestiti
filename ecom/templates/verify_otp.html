@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Enter OTP</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="message">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <!-- OTP Input Form -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="otp" placeholder="Enter OTP" required>
+        <button type="submit">Verify OTP</button>
+    </form>
+
+    <!-- Countdown Timer -->
+    <p id="timer" style="color: #555; margin-top: 10px;">Resend OTP in 2:00</p>
+
+    <!-- Resend OTP Button -->
+    <form action="{% url 'resend_otp' %}" method="POST">
+        {% csrf_token %}
+        <button type="submit" id="resendBtn" disabled>Resend OTP</button>
+    </form>
+</div>
+
+<script>
+    let timerDisplay = document.getElementById('timer');
+    let resendBtn = document.getElementById('resendBtn');
+    let timeLeft = localStorage.getItem("otp_timer") ? parseInt(localStorage.getItem("otp_timer")) : 120;  // Retrieve stored time
+
+    function startCountdown() {
+        const countdown = setInterval(() => {
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+
+            timerDisplay.textContent = `Resend OTP in ${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+            localStorage.setItem("otp_timer", timeLeft);  // Store remaining time in local storage
+
+            timeLeft--;
+
+            if (timeLeft < 0) {
+                clearInterval(countdown);
+                timerDisplay.textContent = "You can now resend OTP.";
+                resendBtn.disabled = false;
+                localStorage.removeItem("otp_timer");  // Clear storage when timer ends
+            }
+        }, 1000);
+    }
+
+    // Start countdown only if time is remaining
+    if (timeLeft > 0) {
+        startCountdown();
+    } else {
+        timerDisplay.textContent = "You can now resend OTP.";
+        resendBtn.disabled = false;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,183 @@
+{% extends 'admin/header.html' %}
+{% load static %}
+
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .product-img {
+            max-width: 55px;  
+            max-height: 55px; 
+            width: auto;      
+            height: auto;   
+            object-fit: cover;
+            transition: transform 0.2s;
+            border-radius: 5px; 
+        }
+        .product-img:hover {
+            transform: scale(1.2);
+        }
+    
+        
+        td {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            padding: 8px; 
+        }
+    
+    
+        .d-flex.justify-content-center {
+            max-width: 150px; 
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Product List</h2>
+                <a href="{% url 'create_product' %}" class="btn btn-primary">➕ Add New Product</a>
+            </div>
+    
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark text-center">
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Price ($)</th>
+                            <th>Category</th>
+                            <th>Offer</th>
+                            <th>cat_offer</th>
+                            <th>Images</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in page_obj %}
+                        <tr class="align-middle text-center">
+                            <td>{{ product.id }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.description }}</td>
+                            <td><strong>₹{{ product.price }}</strong></td>
+                            <td>{{ product.category_id }}</td>
+                            <td>{{ product.offer|default:"-" }}</td>
+                            <td>{{product.category_id.cat_offer}}</td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    {% if product.image1 %}
+                                        <img src="{{ product.image1.url }}" alt="Image 1" class="img-thumbnail product-img me-1">
+                                    {% endif %}
+                                    {% if product.image2 %}
+                                        <img src="{{ product.image2.url }}" alt="Image 2" class="img-thumbnail product-img me-1">
+                                    {% endif %}
+                                    {% if product.image3 %}
+                                        <img src="{{ product.image3.url }}" alt="Image 3" class="img-thumbnail product-img">
+                                    {% endif %}
+                                    {% if not product.image1 and not product.image2 and not product.image3 %}
+                                        <span class="text-muted">No Image</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if product.is_active %}
+                                    <span class="badge bg-success">Listed</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Unlisted</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'edit_product' product.id %}" class="btn btn-warning btn-sm">✏️ Edit</a>
+                                <a href="{% url 'product_unlist' product.id %}" class="btn btn-sm {% if product.is_listed %}btn-danger{% else %}btn-success{% endif %}">
+                                    {% if product.is_active %} Unlist{% else %} List{% endif %}
+                                </a>
+                                <a href="{% url 'variant_list' product.id %}" class="btn btn-secondary btn-sm">Variant</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center text-muted">No products available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
+            
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active"><a class="page-link">{{ num }}</a></li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+            
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
+<!-- Pop-up Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Safe JSON conversion for Django messages -->
+<script id="messages-data" type="application/json">
+    [{% for message in messages %}{"text": "{{ message }}", "tag": "{{ message.tags }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<script>
+    // Parse messages safely from JSON script tag
+    const messages = JSON.parse(document.getElementById('messages-data').textContent);
+
+    if (messages.length > 0) {
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        messages.forEach(msg => {
+            modalTitle.textContent = msg.tag === 'success' ? 'Success' : 'Error';
+            modalMessage.textContent = msg.text;
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+    }
+</script>
+
+
+
+{% endblock %}

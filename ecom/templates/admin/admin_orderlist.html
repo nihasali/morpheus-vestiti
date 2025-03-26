@@ -1,0 +1,149 @@
+{% extends 'admin/header.html' %}
+
+{% load static %}
+{% block content %}
+
+<style>
+    .btn.btn-primary {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 40px;
+    color: #ffffff;
+    border: none;
+    background-color: #3bb77e;
+    border-radius: 4px;
+}
+</style>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order List</h2>
+            <p>Lorem ipsum dolor sit amet.</p>
+        </div>
+        <div>
+        
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3 align-items-center">
+                <!-- Search Bar (Left Side) -->
+                <div class="col-lg-4 col-md-6">
+                    <form method="GET" action="{% url 'admin_order_list' %}" class="search-form d-flex">
+                        <input type="text" name="search" class="form-control me-2" placeholder="Search by name, id, or status" value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
+                </div>
+    
+                <!-- Status Filter (Right Side) -->
+                <div class="col-lg-2 col-6 col-md-3 ms-auto">
+                    <form method="GET" action="">
+                        <select class="form-select" name="status" onchange="this.form.submit()">
+                            <option value="all" {% if not status %}selected{% endif %}>All</option>
+                            <option value="pending" {% if status == "pending" %}selected{% endif %}>Pending</option>
+                            <option value="canceled" {% if status == "canceled" %}selected{% endif %}>Canceled</option>
+                            <option value="delivered" {% if status == "delivered" %}selected{% endif %}>Delivered</option>
+                            <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
+                            <option value="paid" {% if status == "paid" %}selected{% endif %}>Paid</option>
+                            <option value="returned" {% if status == "returned" %}selected{% endif %}>Returned</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </header>
+    </div>
+        <!-- card-header end// -->
+       
+<div class="card-body">
+    <h2>Order List</h2>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#ID</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in page_obj %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td><b>{{ order.user.username }}</b></td>
+                    <td>{{ order.user.email }}</td>
+                    <td>₹{{ order.total_price }}</td>
+                    <td>
+                        {% if order.status == 'pending' %}
+                            <span class="badge rounded-pill alert-warning">Pending</span>
+                        {% elif order.status == 'completed' %}
+                            <span class="badge rounded-pill alert-success">Completed</span>
+                        {% elif order.status == 'canceled' %}
+                            <span class="badge rounded-pill alert-danger">Canceled</span>
+                        {% elif order.status == 'delivered' %}
+                            <span class="badge rounded-pill alert-info">Delivered</span>
+                        {% elif order.status == 'return_req' %}
+                            <span class="badge rounded-pill alert-warning">Return Requested</span>
+                        {% elif order.status == 'returned' %}
+                            <span class="badge rounded-pill alert-success">Returned</span>
+                        {% elif order.status == 'paid' %}
+                            <span class="badge rounded-pill alert-warning">paid</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.created_at|date:"d.m.Y" }}</td>
+                    <td>
+                        <a href="{% url 'admin_order_details' order.id %}?prev=orderlist">Details</a>
+                       
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">No orders found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+    <!-- card end// -->
+    <div class="pagination-area mt-15 mb-50 text-center">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+    
+                <!-- Previous Page Link -->
+                
+    
+                <!-- Page Numbers -->
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="#">{{ num }}</a>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% elif num == 1 or num == page_obj.paginator.num_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link dot">...</a></li>
+                    {% endif %}
+                {% endfor %}
+    
+                <!-- Next Page Link -->
+                
+    
+            </ul>
+        </nav>
+    </div>
+    
+    
+</section>
+
+{% endblock %}

@@ -1,0 +1,344 @@
+{% extends 'newheader.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* General Styles for Order Container */
+.order-container {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    margin: 40px auto;
+    max-width: 800px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.order-container h2, .order-container h4 {
+    color: #333;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+/* Order Summary & Address Styles */
+.order-container .order-summary,
+.order-container .address-details,
+.order-container .order-notes,
+.order-container .ordered-products {
+    margin-bottom: 25px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.order-container .order-summary p,
+.order-container .address-details p,
+.order-container .order-notes p,
+.order-container .ordered-products p {
+    margin: 5px 0;
+    color: #555;
+}
+
+.order-container .ordered-products ul {
+    list-style: none;
+    padding: 0;
+}
+
+.order-container .ordered-products li {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.order-container .ordered-products li:last-child {
+    border-bottom: none;
+}
+
+.order-container .product-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-container .product-info p {
+    margin: 0;
+    color: #444;
+}
+
+.order-container .product-info strong {
+    color: #333;
+}
+
+/* Buttons */
+
+
+.order-container .btn:hover {
+    background-color: #2980b9;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .order-container {
+        padding: 15px;
+    }
+    
+    .order-container .product-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .order-container .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+
+</style>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap JS (before closing body tag) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<div class="order-container">
+    <h2>Order Details</h2>
+    
+    <!-- Order Summary -->
+    <div class="order-summary">
+        <h4>Order #{{ order.id }}</h4>
+        <p><strong>Status:</strong> {{ order.status|capfirst }}</p>
+        <p><strong>Order Date:</strong> {{ order.created_at|date:"d M Y, h:i A" }}</p>
+        <p><strong>Payment Method:</strong> {{ order.payment_method|capfirst }}</p>
+        <p><strong>Total Price:</strong> ₹{{ order.total_price }}</p>
+    </div>
+
+    <!-- Address Details (with Fallback) -->
+    {% if order.address %}
+    <div class="address-details">
+        <h4>Delivery Address</h4>
+        <p>{{ order.address.fullname }}</p>
+        <p>{{ order.address.address }}</p>
+        <p>{{ order.address.city }}, {{ order.address.state }} - {{ order.address.zipcode }}</p>
+        <p>Phone: {{ order.address.phone }}</p>
+    </div>
+    {% else %}
+    <p>No delivery address available.</p>
+    {% endif %}
+
+    <!-- Ordered Products -->
+    <div class="ordered-products">
+        <h4>Products</h4>
+        <ul>
+            {% for item in order.items.all %}
+            <li>
+                <div class="product-info">
+                    <p><strong>Name: {{ item.product.name }}</strong></p>
+                    <p>Size: {{ item.size_variant.size }} | Qty: {{ item.quantity }}</p>
+                    <p>Price: ₹{{ item.price }}</p>
+    
+                    {% if item.status == 'pending' or item.status == 'paid' %}
+                    <form method="POST" action="{% url 'cancel_order_item' order.id item.id %}" onsubmit="return confirm('Are you sure you want to cancel this item?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                    </form>
+                    {% endif %}
+                    {% if item.status == 'canceled' %}
+                    <p style="color: red; font-weight: bold;">Cancelled</p>
+                    {% endif %}
+
+                    {% if item.status == 'delivered' %}
+            <form method="POST" action="{% url 'return_order_item' order.id item.id %}" onsubmit="return confirm('Are you sure you want to return this item?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-success">Return</button>
+            </form>
+        {% elif item.status == 'returned' %}
+            <p style="color: green; font-weight: bold;">Returned</p>
+        {% endif %}
+                    
+                </div>
+            </li>
+            {% empty %}
+            {% for item in cart_items %}
+            <p><strong>Name: {{ item.product.name }}</strong></p>
+            <p>Size: {{ item.size }} | Qty: {{ item.quantity }}</p>
+            <p>Price: ₹{{ item.product.price }}</p>
+            {% endfor %}
+
+            {% endfor %}
+        </ul>
+    </div>
+    <!-- Order Notes if Available -->
+    {% if order.request %}
+    <div class="order-notes">
+        <h4>Order Notes</h4>
+        <p>{{ order.request }}</p>
+    </div>
+    {% endif %}
+
+
+    <!-- Back to Orders Button -->
+    <a href="{% url 'userprofile' %}" class="btn btn-primary">Back to Orders</a>
+
+
+<!-- Download Invoice Button -->
+
+{% if not order.status == 'failed' %}
+<a href="{% url 'download_invoice' order.id %}" class="btn" style="background-color: #45cabf; margin-left: 10px;">
+    Download Invoice
+</a>
+{% endif %}
+
+{% if order.status == 'failed' %}
+<form action="{% url 'retry_payment' order.id %}" method="POST">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger" style="margin: 10px; margin-left: 300px;">Retry Payment</button>
+</form>
+{% endif %}
+
+<!-- Return Button (opens modal) -->
+{% if order.status == 'delivered' %}
+<button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#returnModal{{ order.id }}">
+    Return Order
+</button>
+{% endif %}
+
+<!-- Return Order Modal -->
+<div class="modal fade" id="returnModal{{ order.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Return Order #{{ order.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'return_order' order.id %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <label for="returnReason{{ order.id }}">Reason for Return:</label>
+                    <textarea name="reason" id="returnReason{{ order.id }}" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-warning">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Pop-up Modal for Messages -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Safe JSON conversion for Django messages -->
+<script id="messages-data" type="application/json">
+    [{% for message in messages %}{"text": "{{ message }}", "tag": "{{ message.tags }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<script>
+    // Parse messages safely from JSON script tag
+    const messages = JSON.parse(document.getElementById('messages-data').textContent);
+
+    if (messages.length > 0) {
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        messages.forEach(msg => {
+            modalTitle.textContent = msg.tag === 'success' ? 'Success' : 'Error';
+            modalMessage.textContent = msg.text;
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+    }
+</script>
+
+
+
+    <!-- Cancel Button (opens modal) -->
+{% if order.status == 'pending' or order.status == 'paid' %} 
+<button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelModal{{ order.id }}">
+    Cancel Order
+</button>
+{% endif %}
+
+
+<!-- Cancel Order Modal -->
+<div class="modal fade" id="cancelModal{{ order.id }}" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Cancel Order #{{ order.id }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="{% url 'cancel_order' order.id %}" method="POST">
+            {% csrf_token %}
+            <div class="modal-body">
+                <label for="reason">Reason for Cancellation:</label>
+                <textarea name="reason" id="reason" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-danger">Submit</button>
+            </div>
+        </form>
+    </div>
+</div>
+</div>
+</div>
+
+<!-- Pop-up Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Safe JSON conversion for Django messages -->
+<script id="messages-data" type="application/json">
+    [{% for message in messages %}{"text": "{{ message }}", "tag": "{{ message.tags }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<script>
+    // Parse messages safely from JSON script tag
+    const message = JSON.parse(document.getElementById('messages-data').textContent);
+
+    if (messages.length > 0) {
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        messages.forEach(msg => {
+            modalTitle.textContent = msg.tag === 'success' ? 'Success' : 'Error';
+            modalMessage.textContent = msg.text;
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+    }
+</script>
+
+
+
+
+{% endblock %}

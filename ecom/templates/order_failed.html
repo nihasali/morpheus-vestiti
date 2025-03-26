@@ -1,0 +1,75 @@
+{% extends 'userheader.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Failed</title>
+    <style>
+        .order-failure-container {
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .order-failure-container h2 {
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+        .order-summary {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .order-summary h4 {
+            margin-bottom: 10px;
+        }
+        .btn-home {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .btn-home:hover {
+            background-color: #0056b3;
+        }
+        .btn-retry {
+            display: inline-block;
+            margin-top: 20px;
+            margin-left: 10px;
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: #fff;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .btn-retry:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="order-failure-container">
+    <h2>Order Failed</h2>
+    <p>We couldn't process your order due to a payment issue. Please try again.</p>
+
+    <div class="order-summary">
+        <h4>Order Reference: #{{ order.id }}</h4>
+        <p>Status: <strong style="color: #dc3545;">{{ order.payment_status|title }}</strong></p>
+        <p>Total Amount: <strong>₹{{ order.total_price|floatformat:2 }}</strong></p>
+    </div>
+
+    <a href="{% url 'homepage' %}" class="btn-home">Continue Shopping</a>
+    <a href="{% url 'retry_payment' order.id %}" class="btn-retry">Retry Payment</a>
+    <a href="{% url 'order_details' order.id %} " class="btn-order-details">Order Details</a>
+</div>
+
+</body>
+</html>
+{% endblock %}

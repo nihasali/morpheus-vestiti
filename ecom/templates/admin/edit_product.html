@@ -1,0 +1,125 @@
+{% extends 'admin/header.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center text-primary mb-4">Edit Product</h2>
+        
+        <form method="post" enctype="multipart/form-data" action="{% url 'edit_product' item.id %}" id="prodeditform">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="name" class="form-label fw-bold">Product Name</label>
+                <input type="text" name="name" class="form-control" value="{{ item.name }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label fw-bold">Description</label>
+                <textarea name="description" class="form-control" required>{{ item.description }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="price" class="form-label fw-bold">Price ($)</label>
+                <input type="number" name="price" class="form-control" step="0.01" value="{{ item.price }}" required>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="category_id" class="form-label">Category</label>
+                <select name="category_id" class="form-select" required>
+                    <option value="" disabled selected>Choose category...</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="offer" class="form-label fw-bold">Offer (%)</label>
+                <input type="number" name="offer" class="form-control" value="{{ item.offer }}">
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Image 1</label>
+                    <input type="file" name="image1" class="form-control" onchange="previewImage(event, 'preview1')">
+                    {% if item.image1 %}
+                        <img id="preview1" src="{{ item.image1.url }}" class="img-thumbnail mt-2" width="100">
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Image 2</label>
+                    <input type="file" name="image2" class="form-control" onchange="previewImage(event, 'preview2')">
+                    {% if item.image2 %}
+                        <img id="preview2" src="{{ item.image2.url }}" class="img-thumbnail mt-2" width="100">
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Image 3</label>
+                    <input type="file" name="image3" class="form-control" onchange="previewImage(event, 'preview3')">
+                    {% if item.image3 %}
+                        <img id="preview3" src="{{ item.image3.url }}" class="img-thumbnail mt-2" width="100">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'product_list' %}" class="btn btn-secondary">Back to Products</a>
+                <button type="submit" class="btn btn-primary">Update Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function previewImage(event, previewId) {
+        var reader = new FileReader();
+        reader.onload = function(){
+            var output = document.getElementById(previewId);
+            output.src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>
+
+<!-- Pop-up Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle"></h5>
+            </div>
+            <div class="modal-body" id="modalMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<!-- Safe JSON conversion for Django messages -->
+<script id="messages-data" type="application/json">
+    [{% for message in messages %}{"text": "{{ message }}", "tag": "{{ message.tags }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<script>
+    // Parse messages safely from JSON script tag
+    const messages = JSON.parse(document.getElementById('messages-data').textContent);
+
+    if (messages.length > 0) {
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+
+        messages.forEach(msg => {
+            modalTitle.textContent = msg.tag === 'success' ? 'Success' : 'Error';
+            modalMessage.textContent = msg.text;
+            const modal = new bootstrap.Modal(document.getElementById('messageModal'));
+            modal.show();
+        });
+    }
+</script>
+
+{% endblock %}

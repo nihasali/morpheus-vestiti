@@ -1,0 +1,132 @@
+{% extends 'admin/header.html' %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Variants</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background-color: #f4f7fc;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .variant-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            background: #fff;
+            margin-bottom: 12px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        .variant-card:hover {
+            transform: translateY(-3px);
+        }
+        .variant-card p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+        .variant-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .variant-details {
+            flex-grow: 1;
+        }
+        .edit-btn {
+            background: #6c757d;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+        }
+        .edit-btn:hover {
+            background: #5a6268;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            text-align: center;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .btn-secondary {
+            background: #28a745;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Variants for {{ product.name }}</h2>
+
+    {% if variants %}
+        {% for variant in variants %}
+            <div class="variant-card">
+                <div class="variant-info">
+                    <div class="variant-details">
+                        <p><strong>Size:</strong> {{ variant.size }}</p>
+                        <p><strong>Stock:</strong> {{ variant.stock }}</p>
+                    </div>
+                    <a href="{% url 'edit_variant' id=variant.id product_id=product.id %}" class="edit-btn">Edit</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align: center; color: #777;">No variants available for this product.</p>
+    {% endif %}
+
+    <div class="buttons">
+        <a href="{% url 'product_list' %}" class="btn btn-primary">Back to Products</a>
+        <a href="{% url 'add_variant' product.id %}" class="btn btn-secondary">Add Variant</a>
+    </div>
+</div>
+
+</body>
+</html>
+
+{% endblock %}

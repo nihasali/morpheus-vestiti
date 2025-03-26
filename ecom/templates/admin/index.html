@@ -1,0 +1,316 @@
+{% extends 'admin/header.html' %}
+{% load static %}
+{% block content %}
+
+<section class="content-main">
+  <div class="content-header">
+    <div>
+      <h2 class="content-title card-title">Dashboard</h2>
+      <p>Whole data about your business here</p>
+    </div>
+    <div>
+      <a href="{% url 'sales_report_view' %}" class="btn btn-primary"
+        ><i class="text-muted material-icons md-post_add"></i>Sales-
+        report</a
+      >
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-3">
+      <div class="card card-body mb-4">
+        <article class="icontext">
+          <span class="icon icon-sm rounded-circle bg-primary-light"
+            ><i class="text-primary material-icons md-monetization_on"></i
+          ></span>
+          <div class="text">
+            <h6 class="mb-1 card-title">Revenue</h6>
+            <span>₹{{ total_revenue }}</span>
+            <span class="text-sm"> Shipping fees are not included </span>
+          </div>
+        </article>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card card-body mb-4">
+        <article class="icontext">
+          <span class="icon icon-sm rounded-circle bg-success-light"
+            ><i class="text-success material-icons md-local_shipping"></i
+          ></span>
+          <div class="text">
+            <h6 class="mb-1 card-title">Orders</h6>
+            <span>{{ total_orders }}</span>
+            <span class="text-sm"> Excluding orders in transit </span>
+          </div>
+        </article>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card card-body mb-4">
+        <article class="icontext">
+          <span class="icon icon-sm rounded-circle bg-warning-light"
+            ><i class="text-warning material-icons md-qr_code"></i
+          ></span>
+          <div class="text">
+            <h6 class="mb-1 card-title">Products</h6>
+            <span>{{total_products}}</span>
+            <span class="text-sm"> In 19 Categories </span>
+          </div>
+        </article>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card card-body mb-4">
+        <article class="icontext">
+          <span class="icon icon-sm rounded-circle bg-info-light"
+            ><i class="text-info material-icons md-shopping_basket"></i
+          ></span>
+          <div class="text">
+            <h6 class="mb-1 card-title">Monthly Earning</h6>
+            <span>₹{{monthly_earning}}</span>
+            <span class="text-sm"> Based in your local time. </span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sales Chart Card -->
+  <div class="card mb-4">
+    <header class="card-header">
+      <h4 class="card-title">Sales Analytics</h4>
+      <div class="row align-items-center">
+        <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+          <select class="form-select" id="chart-filter">
+            <option value="yearly">Yearly</option>
+            <option value="monthly" selected>Monthly</option>
+            <option value="weekly">Weekly</option>
+            <option value="daily">Daily</option>
+          </select>
+        </div>
+        <div class="col-md-2 col-6">
+          <select class="form-select" id="chart-year">
+            {% for year in available_years %}
+              <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 col-6">
+          <select class="form-select" id="chart-month" {% if chart_filter != 'monthly' and chart_filter != 'daily' %}style="display:none;"{% endif %}>
+            <option value="1" {% if current_month == 1 %}selected{% endif %}>January</option>
+            <option value="2" {% if current_month == 2 %}selected{% endif %}>February</option>
+            <option value="3" {% if current_month == 3 %}selected{% endif %}>March</option>
+            <option value="4" {% if current_month == 4 %}selected{% endif %}>April</option>
+            <option value="5" {% if current_month == 5 %}selected{% endif %}>May</option>
+            <option value="6" {% if current_month == 6 %}selected{% endif %}>June</option>
+            <option value="7" {% if current_month == 7 %}selected{% endif %}>July</option>
+            <option value="8" {% if current_month == 8 %}selected{% endif %}>August</option>
+            <option value="9" {% if current_month == 9 %}selected{% endif %}>September</option>
+            <option value="10" {% if current_month == 10 %}selected{% endif %}>October</option>
+            <option value="11" {% if current_month == 11 %}selected{% endif %}>November</option>
+            <option value="12" {% if current_month == 12 %}selected{% endif %}>December</option>
+          </select>
+        </div>
+      </div>
+    </header>
+    <div class="card-body">
+      <div>
+        <canvas id="salesChart" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <header class="card-header">
+      <h4 class="card-title">Top Selling Products</h4>
+    </header>
+    <div class="card-body">
+      <div class="row">
+        {% for item in top_products %}
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              <img src="{{ item.product__image1.url }}" class="card-img-top bg-light" alt="{{ item.product__name }}" style="height:200px; object-fit:contain;">
+              <div class="card-body text-center">
+                <h5 class="card-title">{{ item.product__name }}</h5>
+                <h5 class="card-text">Sold: <strong>{{ item.total_quantity }}</strong></h5>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <header class="card-header">
+      <h4 class="card-title">Top Selling Categories</h4>
+    </header>
+    <div class="card-body">
+      <div class="row">
+        {% for cat in top_categories %}
+          <div class="col-md-4 mb-3">
+            <div class="card h-100">
+              {% if cat.product__category_id__image %}
+                <img src="{{ cat.product__category_id__image.url }}" class="card-img-top bg-light" alt="{{ cat.product__category_id__name }}" style="height:200px; object-fit:contain;">
+              {% else %}
+                <img src="{% static 'images/default-category.jpg' %}" class="card-img-top bg-light" alt="{{ cat.product__category_id__name }}" style="height:200px; object-fit:contain;">
+              {% endif %}
+              <div class="card-body text-center">
+                <h5 class="card-title"><strong>{{ cat.product__category_id__name }}</strong></h5>
+                <h5 class="card-text">Total Sold: <strong>{{ cat.total_quantity }}</strong></h5>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <header class="card-header">
+      <h4 class="card-title">Latest orders</h4>
+      <div class="row align-items-center">
+        <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+        </div>
+      </div>
+    </header>
+    <div class="card-body">
+      <div class="table-responsive">
+        <div class="table-responsive">
+          <table class="table align-middle table-nowrap mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="align-middle" scope="col">Order ID</th>
+                <th class="align-middle" scope="col">Billing Name</th>
+                <th class="align-middle" scope="col">Date</th>
+                <th class="align-middle" scope="col">Total</th>
+                <th class="align-middle" scope="col">Payment Status</th>
+                <th class="align-middle" scope="col">Payment Method</th>
+               
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in latest_orders %}
+              <tr>
+                  <td><a href="#" class="fw-bold">#{{ order.id }}</a></td>
+                  <td>{{ order.user.username }}</td>
+                  <td>{{ order.created_at|date:"d M, Y" }}</td>
+                  <td>₹{{ order.total_price }}</td>
+                  <td>
+                      <span class="badge badge-pill badge-soft-{% if order.status == 'Completed' %}success{% else %}warning{% endif %}">
+                          {{ order.status }}
+                      </span>
+                  </td>
+                  <td>{{ order.payment_method }}</td>
+                  
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- table-responsive end// -->
+    </div>
+  </div>
+</section>
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initial chart data - properly parse the JSON data
+    const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
+    let chartLabels = JSON.parse('{{ chart_labels_json|escapejs }}');
+    let chartValues = JSON.parse('{{ chart_values_json|escapejs }}');
+    let salesChart;
+    
+    // Initialize chart
+    function initChart() {
+      const ctx = document.getElementById('salesChart').getContext('2d');
+      
+      salesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Sales Amount ($)',
+            data: chartValues,
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return '$' + value;
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  if (context.parsed.y !== null) {
+                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.y);
+                  }
+                  return label;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    initChart();
+    
+    // Rest of your code remains unchanged
+    const filterType = document.getElementById('chart-filter');
+    const yearSelect = document.getElementById('chart-year');
+    const monthSelect = document.getElementById('chart-month');
+    
+    // Show/hide month selector based on filter
+    filterType.addEventListener('change', function() {
+      if (this.value === 'monthly' || this.value === 'daily') {
+        monthSelect.style.display = 'block';
+      } else {
+        monthSelect.style.display = 'none';
+      }
+      updateChart();
+    });
+    
+    yearSelect.addEventListener('change', updateChart);
+    monthSelect.addEventListener('change', updateChart);
+    
+    function updateChart() {
+      const filter = filterType.value;
+      const year = yearSelect.value;
+      const month = monthSelect.value;
+      
+      // AJAX request to get new data
+      fetch("{% url 'chart_data_api' %}?filter=" + filter + "&year=" + year + "&month=" + month)
+        .then(response => response.json())
+        .then(data => {
+          // Update chart with new data
+          salesChart.data.labels = data.labels;
+          salesChart.data.datasets[0].data = data.values;
+          salesChart.update();
+        })
+        .catch(error => console.error('Error fetching chart data:', error));
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}
