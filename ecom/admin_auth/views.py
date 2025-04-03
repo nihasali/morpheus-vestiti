@@ -22,6 +22,7 @@ import calendar
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
 from collections import defaultdict
 import json
+from django.core.paginator import Paginator
 
 
 @login_required(login_url='admin_login')
@@ -115,15 +116,22 @@ def sales_report_view(request):
     filter_type = request.GET.get("filter", None)
     start_date = request.GET.get("start_date", None)
     end_date = request.GET.get("end_date", None)
+    show_all = request.GET.get("show_all", None)
 
     print(f"Captured Filter Type: {repr(filter_type)}")
     orders = filter_orders_by_date(filter_type,start_date,end_date)
+
+    if not show_all:
+        paginator = Paginator(orders, 10)
+        page_number = request.GET.get("page")
+        orders = paginator.get_page(page_number)
 
     context = {
         'orders':orders,
         "filter_type": filter_type if filter_type else "",
         "start_date": start_date if start_date else "",
         "end_date": end_date if end_date else "",
+        "show_all": show_all,
     }
     return render(request, "admin/sales_report.html", context)
 

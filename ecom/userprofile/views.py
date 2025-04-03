@@ -6,6 +6,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from order.models import Order
 from transaction.models import Transaction
+from django.core.paginator import Paginator
 
 def userprofile(request):
     if not request.user.is_authenticated:
@@ -38,7 +39,7 @@ def userprofile(request):
         request.user.save()
         update_session_auth_hash(request,request.user)
         messages.success(request,'password changed successfully')
-        return redirect(userprofile)
+        return redirect('userprofile')
         
     return render(request,'userprofile.html',{'user':user,'addresses':addresses,'orders':orders,'transactions': transactions})
 

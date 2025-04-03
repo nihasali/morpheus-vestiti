@@ -398,7 +398,7 @@
                                         <i class="fa fa-star-o"></i>
                                     </div>
                                     {% if val.price < val.original_price %}
-                                    <h5><del>₹{{ val.original_price }}</del> ₹{{ val.price }}</h5>
+                                    <h5><del style="color: red;">₹{{ val.original_price }}</del><strong> ₹{{ val.price }} </strong></h5>
                                     {% else %}
                                     <h5>₹{{ val.price }}</h5>
                                     {% endif %}

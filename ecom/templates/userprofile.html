@@ -620,6 +620,7 @@
       <div class="wallet-balance">
         ${{request.user.wallet.balance}}
       </div>
+      <a href="{% url 'wallet_add_money_form' %}" class="btn btn-primary">Add Money</a>
       
       <h3 class="section-title">Recent Transactions</h3>
       
@@ -641,11 +642,11 @@
               </div>
   
               {% if transaction.status in 'canceled returned' %}
-                  <div class="transaction-amount credit">+${{ transaction.amount }}</div>
+                  <div class="transaction-amount credit">+₹{{ transaction.amount }}</div>
               {% elif transaction.status == 'paid' %}
-                  <div class="transaction-amount debit">-${{ transaction.amount }}</div>
+                  <div class="transaction-amount debit">-₹{{ transaction.amount }}</div>
               {% else %}
-                  <div class="transaction-amount">{{ transaction.amount }}</div>
+                  <div class="transaction-amount credit">+₹{{ transaction.amount }}</div>
               {% endif %}
           </li>
           {% endfor %}

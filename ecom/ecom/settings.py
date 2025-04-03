@@ -161,7 +161,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SOCIALACCOUNT_PROVIDERS = {
+SOCIALACCOUN_PROVIDERS = {
     'google': {
         'APP': {
             'client_id': config('GOOGLE_CLIENT_ID'),
