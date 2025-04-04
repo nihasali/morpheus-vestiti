@@ -23,7 +23,6 @@ def create_category(request):
         cat_offer = request.POST.get('cat_offer','').strip()
         image = request.FILES.get('image')
 
-        print(f"Received cat_offer: {cat_offer}")
 
         if not name:
             messages.error(request, 'Category name is required.')
@@ -49,7 +48,7 @@ def create_category(request):
             messages.error(request, "Invalid offer value. Please enter numbers only.")
             return redirect('create_category')
 
-        print(f"Converted cat_offer: {cat_offer}")
+
 
         if not image:
             messages.error(request, "Category image is required.")

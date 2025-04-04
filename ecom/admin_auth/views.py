@@ -104,8 +104,7 @@ def filter_orders_by_date(filter_type, start_date=None, end_date=None):
             start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
             end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
             return Order.objects.filter(created_at__date__range=[start_date, end_date])
-        except ValueError:
-            print("Invalid date format") 
+        except ValueError: 
             return Order.objects.none()
     
     else:
@@ -118,7 +117,7 @@ def sales_report_view(request):
     end_date = request.GET.get("end_date", None)
     show_all = request.GET.get("show_all", None)
 
-    print(f"Captured Filter Type: {repr(filter_type)}")
+
     orders = filter_orders_by_date(filter_type,start_date,end_date)
 
     if not show_all:

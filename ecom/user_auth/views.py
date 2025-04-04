@@ -48,11 +48,6 @@ def verify_otp(request):
         email = request.session.get('email')
         username = request.session.get('username')
         password = request.session.get('password')
-
-
-        print("Username :--------------", username)
-        print("Email :----------", email)
-
         
 
         if not session_otp or not email or not username:
@@ -86,7 +81,6 @@ def resend_otp(request):
     request.session['otp'] = otp  
     request.session.modified = True  
 
-    print(f"New OTP: {otp}")  
 
     try:
         send_mail(

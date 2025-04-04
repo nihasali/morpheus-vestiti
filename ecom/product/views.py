@@ -311,8 +311,5 @@ def product_details(request,id):
     data = get_object_or_404(Product,id=id)
     size_variant = data.variant.all().values('size','stock')
 
-    for variant in size_variant:
-        print(f"Size: {variant['size']}, Stock: {variant['stock']}")
-
 
     return render(request,'product_details.html',{'data':data,'item':size_variant})

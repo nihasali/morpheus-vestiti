@@ -27,7 +27,7 @@ def place_order(request):
     if request.method == "POST":
         address_id = request.POST.get('address_id')
         payment_method = request.POST.get('payment_method', '').strip().lower()
-        print(f"Received Payment Method----------: '{payment_method}'")
+
 
         if not address_id or not payment_method:
             messages.error(request, "Please select an address and payment method.")
@@ -65,7 +65,7 @@ def place_order(request):
             })
 
 
-            print("Generated Razorpay Order ID:", razorpay_order.get('id'))
+
             if not razorpay_order.get('id'):
                 messages.error(request, "Failed to generate Razorpay Order ID.")
                 return redirect('checkout')
