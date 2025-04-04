@@ -12,9 +12,9 @@ from decimal import Decimal
 import json
 
 def transaction_list(request):
-    transactions_qs = Transaction.objects.select_related('user','order').order_by('-created_at')
+    transactions_qs = Transaction.objects.select_related('user','order').filter(order__isnull=False).order_by('-created_at')
 
-    paginator = Paginator(transactions_qs, 6)  
+    paginator = Paginator(transactions_qs, 6)
     page_number = request.GET.get('page')
     transactions = paginator.get_page(page_number)
 

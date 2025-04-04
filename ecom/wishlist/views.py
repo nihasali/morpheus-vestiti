@@ -22,7 +22,7 @@ def add_items_wishlist(request,product_id):
         product_variant = ProductVariant.objects.filter(product=product).first()
         if not product_variant:
             messages.error(request,'no sizes available for this product !')
-            return redirect('shop')
+            return redirect('shop_list')
     
     wishlist,created = Wishlist.objects.get_or_create(user=request.user)
 
