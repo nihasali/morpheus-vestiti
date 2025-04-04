@@ -683,7 +683,7 @@ def download_invoice(request, order_id):
     if order.discount_amount:
         y -= 20
         p.drawString(400, y, "Discount:")
-        p.drawString(500, y, f"-${order.discount:.2f}")
+        p.drawString(500, y, f"-${order.discount_amount:.2f}")
 
     y -= 20
     p.drawString(400, y, "Grand Total:")
